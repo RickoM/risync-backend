@@ -61,9 +61,9 @@ const rooms = new Map();   // roomId → Room
 const jobs  = new Map();   // jobId  → Job
 
 // ── ROOM STRUCTURE ────────────────────────────────────────────
-function createRoom(hostId, hostName, sessionName) {
+function createRoom(hostId, hostName, sessionName, roomCode) {
   const room = {
-    id:          uuid().substring(0, 8).toUpperCase(),
+    id:          roomCode || uuid().substring(0, 8).toUpperCase(),
     sessionName: sessionName || 'Untitled Session',
     hostId,
     hostName,
@@ -134,7 +134,8 @@ wss.on('connection', (ws) => {
 
       // ── Create a new session room ───────────────────────────
       case 'create-room': {
-        const room = createRoom(client.peerId, msg.name || 'Host', msg.sessionName);
+        // Accept roomCode from client or generate one
+        const room = createRoom(client.peerId, msg.name || 'Host', msg.sessionName, msg.roomCode);
         client.roomId = room.id;
         room.participants.set(client.peerId, {
           peerId:   client.peerId,
@@ -145,10 +146,11 @@ wss.on('connection', (ws) => {
           ws,
         });
         ws.send(JSON.stringify({
-          type:   'room-created',
-          roomId: room.id,
-          peerId: client.peerId,
-          room:   getRoomSummary(room),
+          type:     'room-created',
+          roomId:   room.id,
+          roomCode: room.id,  // send both for compatibility
+          peerId:   client.peerId,
+          room:     getRoomSummary(room),
         }));
         console.log(`Room created: ${room.id} by ${msg.name}`);
         break;
@@ -156,9 +158,11 @@ wss.on('connection', (ws) => {
 
       // ── Join an existing room ───────────────────────────────
       case 'join-room': {
-        const room = rooms.get(msg.roomId);
+        // Accept both roomId and roomCode
+        const roomKey = msg.roomId || msg.roomCode;
+        const room = rooms.get(roomKey);
         if (!room) {
-          ws.send(JSON.stringify({ type: 'error', message: 'Room not found' }));
+          ws.send(JSON.stringify({ type: 'error', message: 'Room not found: ' + roomKey }));
           return;
         }
         client.roomId = msg.roomId;
