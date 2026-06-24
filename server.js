@@ -264,6 +264,14 @@ wss.on('connection', (ws) => {
       }
 
       // ── Ping / keepalive ────────────────────────────────────
+      case 'flip-camera': {
+        sendTo(client.roomId, msg.targetPeerId, {
+          type:       'flip-camera',
+          fromPeerId: client.peerId,
+        });
+        break;
+      }
+
       case 'ping': {
         ws.send(JSON.stringify({ type: 'pong', ts: Date.now() }));
         break;
