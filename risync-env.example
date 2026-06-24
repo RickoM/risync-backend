@@ -1,0 +1,17 @@
+# RISYNC Backend — Environment Variables
+# Copy this to .env for local dev
+# Set these in Render dashboard for production
+
+# MongoDB Atlas connection string
+# Create a new database called "risync" in your existing Atlas cluster
+MONGO_URI=mongodb+srv://USERNAME:PASSWORD@your-cluster.mongodb.net/risync?retryWrites=true&w=majority
+
+# Your GitHub Pages frontend URL (for CORS)
+FRONTEND_URL=https://rickom.github.io
+
+# Secret key for Colab worker authentication
+# Generate any random string e.g: openssl rand -hex 32
+WORKER_SECRET=replace-with-random-secret-string
+
+# Port (Render sets this automatically)
+PORT=3000
