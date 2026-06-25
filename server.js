@@ -272,6 +272,29 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      case 'phone-recording': {
+        // Broadcast to all room participants (notify studio)
+        broadcast(client.roomId, {
+          type:       'phone-recording',
+          fromPeerId: client.peerId,
+          recording:  msg.recording,
+        }, client.peerId);
+        break;
+      }
+
+      case 'return-label': {
+        sendTo(client.roomId, msg.targetPeerId, { type:'return-label', label: msg.label });
+        break;
+      }
+
+      case 'tally': {
+        sendTo(client.roomId, msg.targetPeerId, {
+          type:      'tally',
+          recording: msg.recording,
+        });
+        break;
+      }
+
       case 'ping': {
         ws.send(JSON.stringify({ type: 'pong', ts: Date.now() }));
         break;
